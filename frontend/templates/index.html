@@ -311,18 +311,37 @@
         }
 
         .form-url a { 
-            color: var(--primary-color);
+            color: white;
+            background: var(--primary-gradient);
             text-decoration: none; 
             font-weight: 600;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            transition: all var(--transition-fast);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--border-radius-md);
+            transition: all var(--transition-medium);
+            box-shadow: var(--shadow-light);
+            border: 2px solid transparent;
+            font-size: 0.95rem;
+            min-width: 140px;
+            text-align: center;
         }
 
-        .form-url a:hover { 
-            text-decoration: underline;
-            color: var(--secondary-color);
+        .form-url a:hover, .form-url a:focus { 
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            background: var(--secondary-gradient);
+            outline: none;
+        }
+
+        .form-url a:active {
+            transform: translateY(0);
+        }
+
+        .form-url a i {
+            font-size: 0.9em;
         }
         
         /* Tab System */
@@ -854,6 +873,7 @@
                             "<div class=\"form-code\">" + form.code + "</div>" +
                             "<div class=\"form-title\">" + form.name + "</div>" +
                             "<div>" + form.purpose + "</div>" +
+                            (form.url ? "<div class=\"form-url\"><a href=\"" + form.url + "\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Open " + form.code + " form in new tab\"><i class='fas fa-external-link-alt' aria-hidden='true'></i> View " + form.code + "</a></div>" : "") +
                         "</div>"
                     ).join("");
             } else {
@@ -917,7 +937,7 @@
                         "<div class=\"form-code\">" + form.code + "</div>" +
                         "<div class=\"form-title\">" + form.title + "</div>" +
                         "<div class=\"form-topic\"><i class='fas fa-tag' aria-hidden='true'></i> " + form.topic + "</div>" +
-                        (form.url ? "<div class=\"form-url\"><a href=\"" + form.url + "\" target=\"_blank\" rel=\"noopener noreferrer\"><i class='fas fa-external-link-alt' aria-hidden='true'></i> View Form</a></div>" : "") +
+                        (form.url ? "<div class=\"form-url\"><a href=\"" + form.url + "\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"Open " + form.code + " form in new tab\"><i class='fas fa-external-link-alt' aria-hidden='true'></i> View " + form.code + "</a></div>" : "") +
                     "</div>"
                 ).join("");
             } else {
