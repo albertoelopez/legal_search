@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from playwright.sync_api import sync_playwright
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 from llama_index.llms.openai import OpenAI
@@ -9,11 +10,18 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import sseclient
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 FORMS_URL = "https://courts.ca.gov/rules-forms/find-your-court-forms"
 OUTPUT_JSON = "court_forms.json"
-LLM_API_URL = "https://api.gmi-serving.com/v1/chat/completions"
-LLM_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjY4ZGNiLTc2MjYtNDU1YS04MTJlLWNjZWQ0NGM1MmFmMSIsInR5cGUiOiJpZV9tb2RlbCJ9.wSR0pMUfjAfTijf8jJSaiec1FutdKCcCJq6RlJo62uM "
+LLM_API_URL = os.getenv('LLM_API_URL', 'https://api.gmi-serving.com/v1/chat/completions')
+LLM_API_KEY = os.getenv('LLM_API_KEY')
+
+if not LLM_API_KEY:
+    print("⚠️  Warning: LLM_API_KEY not set in environment variables. LLM features will be disabled.")
 
 
 def crawl_court_forms():

@@ -10,6 +10,9 @@ import urllib.parse
 # Add parent directory to path to import the legal agent
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Import our updated court forms agent
+from court_forms_agent import CourtFormsAgent
+
 app = Flask(__name__)
 CORS(app)
 
@@ -18,6 +21,8 @@ MCP_BASE_URL = "http://localhost:8052"
 class LegalAgentAPI:
     def __init__(self):
         self.mcp_session_id = None
+        # Initialize our updated court forms agent
+        self.court_agent = CourtFormsAgent()
 
     def get_mcp_session_id(self):
         """Get session ID from MCP server SSE endpoint."""
@@ -63,13 +68,43 @@ class LegalAgentAPI:
         except Exception as e:
             return {"error": str(e)}
 
-    def search_forms(self, query):
-        """Search for forms using MCP search."""
-        result = self.call_mcp_tool("search_legal_forms", {
-            "query": query,
-            "limit": 5
-        })
-        return result
+    def search_forms(self, query, limit=5):
+        """Search for forms using our vector database agent."""
+        try:
+            # Use our updated court forms agent for vector search
+            results = self.court_agent.search_vector_database(query, limit=limit, similarity_threshold=0.0)
+            
+            # Format results for frontend
+            formatted_results = []
+            for result in results:
+                formatted_results.append({
+                    "code": result.get('form_code', 'Unknown'),
+                    "title": result.get('title', 'Unknown Form'),
+                    "topic": result.get('topic', 'Unknown'),
+                    "similarity": result.get('similarity', 0.0),
+                    "url": result.get('url', ''),
+                    "content": result.get('content', '')[:200] + "..." if len(result.get('content', '')) > 200 else result.get('content', '')
+                })
+            
+            return {
+                "status": "success",
+                "forms": formatted_results,
+                "total_found": len(formatted_results),
+                "source": "vector_database"
+            }
+            
+        except Exception as e:
+            print(f"Error in vector search: {e}")
+            # Fallback to MCP if vector search fails
+            result = self.call_mcp_tool("search_legal_forms", {
+                "query": query,
+                "limit": limit
+            })
+            return {
+                "status": "fallback_mcp",
+                "result": result,
+                "source": "mcp_fallback"
+            }
 
     def get_guidance_for_question(self, question):
         """Provide specific guidance based on the question."""
@@ -903,22 +938,24 @@ def ask_question():
         # Get guidance based on question
         guidance = legal_agent.get_guidance_for_question(question)
         
-        # Search for relevant forms using MCP
-        search_result = legal_agent.search_forms(question)
+        # Search for relevant forms using our vector database agent
+        search_result = legal_agent.search_forms(question, limit=5)
         
-        # Try to enhance guidance with MCP results if available
-        if search_result and "error" not in search_result:
-            guidance["mcp_enhanced"] = True
+        # Try to enhance guidance with vector search results
+        if search_result and search_result.get("status") == "success":
+            guidance["vector_enhanced"] = True
             guidance["search_performed"] = True
+            guidance["relevant_forms"] = search_result.get("forms", [])
         else:
-            guidance["mcp_enhanced"] = False
+            guidance["vector_enhanced"] = False
             guidance["search_performed"] = False
+            guidance["relevant_forms"] = []
         
         response = {
             "question": question,
             "guidance": guidance,
             "search_status": search_result.get("status", "unknown"),
-            "mcp_response": search_result
+            "vector_response": search_result
         }
         
         return jsonify(response)
@@ -936,35 +973,13 @@ def search_forms():
         if not query:
             return jsonify({"error": "No search query provided"}), 400
         
-        # Search using MCP
-        result = legal_agent.search_forms(query)
+        # Search using our vector database agent
+        result = legal_agent.search_forms(query, limit=10)
         
-        # Parse MCP response
+        # Extract forms from vector search result
         forms = []
-        if result and "result" in result and "content" in result["result"]:
-            content_list = result["result"]["content"]
-            if isinstance(content_list, list) and len(content_list) > 0:
-                content = content_list[0].get("text", "")
-                
-                # Extract form information from the response
-                import re
-                form_matches = re.findall(r'\*\*([A-Z]{1,4}-\d{1,4}[A-Z]?)\*\* - (.+?)\n', content)
-                
-                for form_code, title in form_matches:
-                    # Extract additional info for each form
-                    form_section = content[content.find(f"**{form_code}**"):content.find(f"**{form_code}**") + 500]
-                    
-                    topic_match = re.search(r'📋 Topic: (.+)', form_section)
-                    similarity_match = re.search(r'📊 Similarity: ([\d.]+)', form_section)
-                    url_match = re.search(r'🔗 URL: (.+)', form_section)
-                    
-                    forms.append({
-                        "code": form_code,
-                        "title": title.strip(),
-                        "topic": topic_match.group(1) if topic_match else "Unknown",
-                        "similarity": float(similarity_match.group(1)) if similarity_match else 0.0,
-                        "url": url_match.group(1).strip() if url_match else ""
-                    })
+        if result and result.get("status") == "success":
+            forms = result.get("forms", [])
         
         return jsonify({
             "query": query,
@@ -1043,8 +1058,64 @@ def get_sources():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/stats', methods=['GET'])
+def get_database_stats():
+    """Get vector database statistics."""
+    try:
+        stats = legal_agent.court_agent.get_database_stats()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/topics', methods=['GET'])
+def get_topics():
+    """Get available topics from the vector database."""
+    try:
+        topics = legal_agent.court_agent.get_available_topics()
+        return jsonify({
+            "topics": topics,
+            "total_topics": len(topics)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/search_by_topic', methods=['POST'])
+def search_by_topic():
+    """Search forms by specific topic."""
+    try:
+        data = request.get_json()
+        topic = data.get('topic', '')
+        limit = data.get('limit', 10)
+        
+        if not topic:
+            return jsonify({"error": "No topic provided"}), 400
+        
+        # Search by topic using our vector database agent
+        results = legal_agent.court_agent.search_by_topic(topic, limit=limit)
+        
+        # Format results for frontend
+        formatted_results = []
+        for result in results:
+            formatted_results.append({
+                "code": result.get('form_code', 'Unknown'),
+                "title": result.get('title', 'Unknown Form'),
+                "topic": result.get('topic', 'Unknown'),
+                "url": result.get('url', ''),
+                "content": result.get('content', '')[:200] + "..." if len(result.get('content', '')) > 200 else result.get('content', '')
+            })
+        
+        return jsonify({
+            "topic": topic,
+            "forms": formatted_results,
+            "total_found": len(formatted_results)
+        })
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     print("🏛️  Starting California Legal Forms Assistant Web Server")
     print("📱 Frontend will be available at: http://localhost:5000")
-    print("🔌 Make sure MCP server is running on localhost:8051")
+    print("🗄️  Using Vector Database with 718 forms across 26 topics")
+    print("🔌 MCP server fallback available on localhost:8051")
     app.run(debug=True, host='0.0.0.0', port=5000) 

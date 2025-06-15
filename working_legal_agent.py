@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 import json
+import os
 import urllib.request
 import urllib.parse
+from dotenv import load_dotenv
 
-MCP_BASE_URL = "http://localhost:8051"
-LLM_API_URL = "https://api.gmi-serving.com/v1/chat/completions"
-LLM_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjY4ZGNiLTc2MjYtNDU1YS04MTJlLWNjZWQ0NGM1MmFmMSIsInR5cGUiOiJpZV9tb2RlbCJ9.wSR0pMUfjAfTijf8jJSaiec1FutdKCcCJq6RlJo62uM "
+# Load environment variables
+load_dotenv()
+
+MCP_BASE_URL = os.getenv('MCP_BASE_URL', 'http://localhost:8051')
+LLM_API_URL = os.getenv('LLM_API_URL', 'https://api.gmi-serving.com/v1/chat/completions')
+LLM_API_KEY = os.getenv('LLM_API_KEY')
+
+if not LLM_API_KEY:
+    print("⚠️  Warning: LLM_API_KEY not set in environment variables. LLM features will be disabled.")
 
 class LegalAgent:
     def __init__(self):

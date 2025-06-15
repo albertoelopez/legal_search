@@ -1,6 +1,7 @@
 requests
 playwright
 sentence-transformers
-faiss-cpu
 numpy
-sseclient-py 
+sseclient-py
+supabase
+python-dotenv 

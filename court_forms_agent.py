@@ -1,33 +1,290 @@
 import json
 import os
-import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from playwright.sync_api import sync_playwright
 import urllib.request
 import urllib.parse
+from supabase import create_client, Client
+from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 FORMS_URL = "https://courts.ca.gov/rules-forms/find-your-court-forms"
 OUTPUT_JSON = "court_forms.json"
 EMBEDDINGS_MODEL = "all-MiniLM-L6-v2"
-FAISS_INDEX_PATH = "forms.index"
-FORMS_TEXTS_PATH = "forms_texts.json"
-LLM_API_URL = "https://api.gmi-serving.com/v1/chat/completions"
-LLM_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjY4ZGNiLTc2MjYtNDU1YS04MTJlLWNjZWQ0NGM1MmFmMSIsInR5cGUiOiJpZV9tb2RlbCJ9.wSR0pMUfjAfTijf8jJSaiec1FutdKCcCJq6RlJo62uM "
-MCP_BASE_URL = "http://localhost:8051"
+LLM_API_URL = os.getenv('LLM_API_URL', 'https://api.gmi-serving.com/v1/chat/completions')
+LLM_API_KEY = os.getenv('LLM_API_KEY')
+MCP_BASE_URL = os.getenv('MCP_BASE_URL', 'http://localhost:8051')
+
+if not LLM_API_KEY:
+    print("⚠️  Warning: LLM_API_KEY not set in environment variables. LLM features will be disabled.")
 
 class CourtFormsAgent:
-    def __init__(self, forms_url=FORMS_URL, output_json=OUTPUT_JSON, embeddings_model=EMBEDDINGS_MODEL, faiss_index_path=FAISS_INDEX_PATH, forms_texts_path=FORMS_TEXTS_PATH):
+    def __init__(self, forms_url=FORMS_URL, output_json=OUTPUT_JSON, embeddings_model=EMBEDDINGS_MODEL):
         self.forms_url = forms_url
         self.output_json = output_json
         self.embeddings_model = embeddings_model
-        self.faiss_index_path = faiss_index_path
-        self.forms_texts_path = forms_texts_path
         self.forms = None
         self.model = SentenceTransformer(self.embeddings_model)
-        self.index = None
-        self.form_texts = None
         self.mcp_session_id = None
+        
+        # Initialize Supabase client
+        self.supabase_client = None
+        self.init_supabase()
+
+    def init_supabase(self):
+        """Initialize Supabase client for vector database operations."""
+        supabase_url = os.getenv('SUPABASE_URL')
+        supabase_key = os.getenv('SUPABASE_SERVICE_KEY')
+        
+        if not supabase_url or not supabase_key:
+            print("⚠️  Warning: SUPABASE_URL and SUPABASE_SERVICE_KEY not set. Vector search will be disabled.")
+            return
+        
+        try:
+            self.supabase_client = create_client(supabase_url, supabase_key)
+            print("✅ Connected to Supabase vector database")
+        except Exception as e:
+            print(f"❌ Failed to connect to Supabase: {e}")
+            self.supabase_client = None
+
+    def create_query_embedding(self, query: str) -> List[float]:
+        """Create embedding for a search query."""
+        try:
+            embedding = self.model.encode([query], convert_to_tensor=False)
+            return embedding[0].tolist()
+        except Exception as e:
+            print(f"❌ Error creating embedding for '{query}': {e}")
+            return [0.0] * 384
+
+    def _clean_title_to_english(self, title: str) -> str:
+        """Clean form titles to show only English text."""
+        if not title:
+            return "Unknown Form"
+        
+        # Remove common non-English text patterns
+        import re
+        
+        # Remove Chinese characters (汉语)
+        title = re.sub(r'汉语', '', title)
+        
+        # Remove Korean characters (한국어)
+        title = re.sub(r'한국어', '', title)
+        
+        # Remove Spanish marker (español)
+        title = re.sub(r'español', '', title)
+        
+        # Remove Vietnamese marker (Tiếng Việt)
+        title = re.sub(r'Tiếng Việt', '', title)
+        
+        # Remove Arabic marker (اَلْعَرَبِيَّةُ)
+        title = re.sub(r'اَلْعَرَبِيَّةُ', '', title)
+        
+        # Remove Tagalog marker
+        title = re.sub(r'Tagalog', '', title)
+        
+        # Remove any remaining non-ASCII characters except common punctuation
+        title = re.sub(r'[^\x00-\x7F]+', '', title)
+        
+        # Clean up extra whitespace and trailing punctuation
+        title = re.sub(r'\s+', ' ', title)  # Multiple spaces to single space
+        title = title.strip()
+        
+        # Remove trailing commas or other punctuation that might be left over
+        title = re.sub(r'[,\s]+$', '', title)
+        
+        return title if title else "Unknown Form"
+
+    def search_vector_database(self, query: str, limit: int = 10, similarity_threshold: float = 0.1) -> List[Dict[str, Any]]:
+        """Search the vector database for relevant forms."""
+        if not self.supabase_client:
+            print("❌ Supabase client not initialized. Cannot perform vector search.")
+            return []
+        
+        try:
+            # Create embedding for the query
+            query_embedding = self.create_query_embedding(query)
+            
+            # Try the database function first
+            result = self.supabase_client.rpc(
+                'match_crawled_pages',
+                {
+                    'query_embedding': query_embedding,
+                    'match_count': limit,
+                    'filter': {},
+                    'source_filter': None
+                }
+            ).execute()
+            
+            if result.data:
+                # Filter by similarity threshold and format results
+                filtered_results = []
+                for item in result.data:
+                    if item.get('similarity', 0) >= similarity_threshold:
+                        metadata = item.get('metadata', {})
+                        raw_title = metadata.get('title', 'Unknown Form')
+                        clean_title = self._clean_title_to_english(raw_title)
+                        filtered_results.append({
+                            'title': clean_title,
+                            'url': item.get('url', ''),
+                            'form_code': metadata.get('form_code', ''),
+                            'topic': metadata.get('topic', ''),
+                            'content': item.get('content', ''),
+                            'similarity': item.get('similarity', 0),
+                            'metadata': metadata
+                        })
+                
+                return filtered_results
+            else:
+                # Fallback: Manual similarity calculation
+                print("⚠️  Database function returned 0 results, trying manual calculation...")
+                return self._manual_similarity_search(query_embedding, limit, similarity_threshold)
+                
+        except Exception as e:
+            print(f"❌ Error searching vector database for '{query}': {e}")
+            # Fallback: Manual similarity calculation
+            print("⚠️  Trying manual similarity calculation as fallback...")
+            return self._manual_similarity_search(self.create_query_embedding(query), limit, similarity_threshold)
+
+    def _manual_similarity_search(self, query_embedding: List[float], limit: int, similarity_threshold: float) -> List[Dict[str, Any]]:
+        """Manual similarity search as fallback when database function fails."""
+        try:
+            import ast
+            import numpy as np
+            
+            # Get all records (or a reasonable subset)
+            result = self.supabase_client.table('crawled_pages').select(
+                'id, url, content, metadata, embedding'
+            ).limit(min(1000, limit * 20)).execute()  # Get more records to search through
+            
+            if not result.data:
+                return []
+            
+            query_vec = np.array(query_embedding)
+            similarities = []
+            
+            for item in result.data:
+                try:
+                    # Parse stored embedding
+                    embedding_str = item['embedding']
+                    stored_embedding = np.array(ast.literal_eval(embedding_str))
+                    
+                    # Calculate cosine similarity
+                    dot_product = np.dot(query_vec, stored_embedding)
+                    norm_query = np.linalg.norm(query_vec)
+                    norm_stored = np.linalg.norm(stored_embedding)
+                    
+                    if norm_query > 0 and norm_stored > 0:
+                        cosine_sim = dot_product / (norm_query * norm_stored)
+                        similarity = cosine_sim  # Use cosine similarity directly
+                        
+                        if similarity >= similarity_threshold:
+                            metadata = item.get('metadata', {})
+                            raw_title = metadata.get('title', 'Unknown Form')
+                            clean_title = self._clean_title_to_english(raw_title)
+                            similarities.append({
+                                'title': clean_title,
+                                'url': item.get('url', ''),
+                                'form_code': metadata.get('form_code', ''),
+                                'topic': metadata.get('topic', ''),
+                                'content': item.get('content', ''),
+                                'similarity': similarity,
+                                'metadata': metadata
+                            })
+                            
+                except Exception as e:
+                    # Skip records with parsing errors
+                    continue
+            
+            # Sort by similarity (highest first) and return top results
+            similarities.sort(key=lambda x: x['similarity'], reverse=True)
+            return similarities[:limit]
+            
+        except Exception as e:
+            print(f"❌ Manual similarity search failed: {e}")
+            return []
+
+    def search_by_topic(self, topic: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """Search forms by specific topic using metadata filtering."""
+        if not self.supabase_client:
+            print("❌ Supabase client not initialized. Cannot perform topic search.")
+            return []
+        
+        try:
+            result = self.supabase_client.table('crawled_pages').select(
+                'id, content, metadata, url'
+            ).contains('metadata', {'topic': topic}).limit(limit).execute()
+            
+            if result.data:
+                formatted_results = []
+                for item in result.data:
+                    metadata = item.get('metadata', {})
+                    raw_title = metadata.get('title', 'Unknown Form')
+                    clean_title = self._clean_title_to_english(raw_title)
+                    formatted_results.append({
+                        'title': clean_title,
+                        'url': item.get('url', ''),
+                        'form_code': metadata.get('form_code', ''),
+                        'topic': metadata.get('topic', ''),
+                        'content': item.get('content', ''),
+                        'metadata': metadata
+                    })
+                return formatted_results
+            else:
+                return []
+                
+        except Exception as e:
+            print(f"❌ Error searching by topic '{topic}': {e}")
+            return []
+
+    def get_available_topics(self) -> List[str]:
+        """Get list of available topics from the database."""
+        if not self.supabase_client:
+            return []
+        
+        try:
+            # Get distinct topics from metadata
+            result = self.supabase_client.table('crawled_pages').select('metadata').execute()
+            
+            topics = set()
+            if result.data:
+                for item in result.data:
+                    metadata = item.get('metadata', {})
+                    topic = metadata.get('topic')
+                    if topic:
+                        topics.add(topic)
+            
+            return sorted(list(topics))
+            
+        except Exception as e:
+            print(f"❌ Error getting available topics: {e}")
+            return []
+
+    def get_database_stats(self) -> Dict[str, Any]:
+        """Get statistics about the vector database."""
+        if not self.supabase_client:
+            return {"error": "Supabase client not initialized"}
+        
+        try:
+            # Get total count
+            result = self.supabase_client.table('crawled_pages').select('id', count='exact').execute()
+            total_count = result.count if hasattr(result, 'count') else len(result.data)
+            
+            # Get topics
+            topics = self.get_available_topics()
+            
+            return {
+                "total_forms": total_count,
+                "total_topics": len(topics),
+                "available_topics": topics,
+                "database_ready": True
+            }
+            
+        except Exception as e:
+            return {"error": str(e), "database_ready": False}
 
     def get_mcp_session_id(self):
         """Get session ID from MCP server SSE endpoint."""
@@ -174,92 +431,64 @@ class CourtFormsAgent:
         except Exception as e:
             return f"Error calling LLM: {e}"
 
-    def crawl_forms(self):
-        """Crawl the California Courts forms page and extract form titles and URLs."""
-        forms = []
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(self.forms_url)
-            page.wait_for_load_state("networkidle")
-            links = page.query_selector_all("a[href*='forms/']")
-            for link in links:
-                title = link.inner_text().strip()
-                url = link.get_attribute("href")
-                if url and title:
-                    if not url.startswith("http"):
-                        url = "https://courts.ca.gov" + url
-                    forms.append({"title": title, "url": url})
-            browser.close()
-        with open(self.output_json, "w") as f:
-            json.dump(forms, f, indent=2)
-        print(f"Extracted {len(forms)} forms and saved to {self.output_json}")
-        self.forms = forms
-        return forms
-
-    def load_forms(self):
-        with open(self.output_json, "r") as f:
-            self.forms = json.load(f)
-        return self.forms
-
-    def build_index(self):
-        """Build FAISS index from forms using local embeddings."""
-        if self.forms is None:
-            self.load_forms()
-        form_texts = [f"{form['title']}: {form['url']}" for form in self.forms]
-        embeddings = self.model.encode(form_texts, show_progress_bar=True)
-        index = faiss.IndexFlatL2(embeddings.shape[1])
-        index.add(np.array(embeddings).astype("float32"))
-        faiss.write_index(index, self.faiss_index_path)
-        with open(self.forms_texts_path, "w") as f:
-            json.dump(form_texts, f)
-        print(f"Built FAISS index and saved to {self.faiss_index_path}")
-        self.index = index
-        self.form_texts = form_texts
-
-    def load_index(self):
-        """Load FAISS index and form texts from disk."""
-        self.index = faiss.read_index(self.faiss_index_path)
-        with open(self.forms_texts_path) as f:
-            self.form_texts = json.load(f)
-        if self.forms is None:
-            self.load_forms()
-
-    def retrieve_forms(self, query, top_k=5):
-        """Semantic search for relevant forms using local embeddings and FAISS."""
-        if self.index is None or self.form_texts is None:
-            self.load_index()
-        query_emb = self.model.encode([query])
-        D, I = self.index.search(np.array(query_emb).astype("float32"), top_k)
-        return [self.forms[i] for i in I[0]]
-
     def answer_question(self, user_question, top_k=5):
-        relevant_forms = self.retrieve_forms(user_question, top_k=top_k)
-        context = "\n".join(f"- {f['title']}: {f['url']}" for f in relevant_forms)
+        """Answer questions using vector database search and LLM."""
+        print(f"🔍 Searching vector database for: {user_question}")
+        
+        # Search the vector database with a very low threshold to catch any results
+        relevant_forms = self.search_vector_database(user_question, limit=top_k, similarity_threshold=0.0)
+        
+        if not relevant_forms:
+            return "❌ No relevant forms found in the database. Please try a different query or check if the database is properly set up."
+        
+        # Format context for LLM
+        context_parts = []
+        for form in relevant_forms:
+            similarity = form.get('similarity', 0)
+            title = form.get('title', 'Unknown')
+            form_code = form.get('form_code', '')
+            topic = form.get('topic', '')
+            url = form.get('url', '')
+            
+            context_parts.append(f"- {form_code} - {title} (Topic: {topic}, Similarity: {similarity:.3f})")
+            if url:
+                context_parts.append(f"  URL: {url}")
+        
+        context = "\n".join(context_parts)
+        
         prompt = (
-            "You are a helpful AI assistant. Given the following court forms and a user question, "
-            "suggest which form(s) are most relevant and what information the user needs to fill out. "
-            "For each form you mention, include its full name and the direct URL if available from the provided list.\n"
-            f"Court Forms:\n{context}\n\nQuestion: {user_question}"
+            "You are a helpful AI assistant specializing in California court forms. "
+            "Given the following relevant court forms and a user question, "
+            "suggest which form(s) are most relevant and provide guidance on what information is needed. "
+            "Include the form codes, full names, and URLs when available.\n\n"
+            f"Relevant Forms:\n{context}\n\nUser Question: {user_question}\n\n"
+            "Please provide a helpful response that includes:\n"
+            "1. The most relevant form(s) for their situation\n"
+            "2. Brief explanation of what each form is for\n"
+            "3. Any important steps or requirements they should know about"
         )
+        
+        # Call LLM
+        data = json.dumps({
+            "model": "deepseek-ai/DeepSeek-R1-0528",
+            "messages": [
+                {"role": "system", "content": "You are a helpful AI assistant specializing in California court forms and legal procedures."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0,
+            "max_tokens": 800
+        }).encode('utf-8')
+        
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {LLM_API_KEY.strip()}"
         }
-        data = {
-            "model": "deepseek-ai/DeepSeek-R1-0528",
-            "messages": [
-                {"role": "system", "content": "You are a helpful AI assistant"},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0,
-            "max_tokens": 500
-        }
-        response = requests.post(LLM_API_URL, headers=headers, json=data)
-        response.raise_for_status()
-        resp_json = response.json()
-        print("Full LLM response:", json.dumps(resp_json, indent=2))
+        
         try:
+            req = urllib.request.Request(LLM_API_URL, data=data, headers=headers)
+            with urllib.request.urlopen(req) as response:
+                resp_json = json.loads(response.read().decode('utf-8'))
+                
             msg = resp_json["choices"][0]["message"]
             if msg.get("content"):
                 return msg["content"]
@@ -267,15 +496,49 @@ class CourtFormsAgent:
                 return msg["reasoning_content"]
             else:
                 return "No valid answer found in LLM response."
-        except (KeyError, IndexError):
-            return "No valid answer found in LLM response."
+        except Exception as e:
+            return f"Error calling LLM: {e}"
+
+    # Legacy methods for backward compatibility (now deprecated)
+    def crawl_forms(self):
+        """Legacy method - crawling is now handled by comprehensive crawler."""
+        print("⚠️  This method is deprecated. Use the comprehensive crawler instead.")
+        print("   Run: python3 comprehensive_legal_crawler.py")
+        return []
+
+    def load_forms(self):
+        """Legacy method - forms are now loaded from vector database."""
+        print("⚠️  This method is deprecated. Forms are now loaded from the vector database.")
+        return []
+
+    def build_index(self):
+        """Legacy method - indexing is now handled by the vector database."""
+        print("⚠️  This method is deprecated. Vector indexing is handled by Supabase.")
+        print("   Forms are automatically indexed when stored in the database.")
+
+    def load_index(self):
+        """Legacy method - index is now the vector database."""
+        print("⚠️  This method is deprecated. Vector search uses the Supabase database directly.")
+
+    def retrieve_forms(self, query, top_k=5):
+        """Retrieve forms using vector database search."""
+        return self.search_vector_database(query, limit=top_k)
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Court Forms Agent (Local + MCP)")
-    parser.add_argument("--crawl", action="store_true", help="Crawl and update court forms list (local).")
-    parser.add_argument("--build-index", action="store_true", help="Build FAISS index from forms (local).")
-    parser.add_argument("--ask", type=str, help="Ask a question about court forms (local semantic search).")
+    parser = argparse.ArgumentParser(description="Court Forms Agent (Vector Database + MCP)")
+    
+    # Vector database operations
+    parser.add_argument("--ask", type=str, help="Ask a question about court forms using vector database search.")
+    parser.add_argument("--search", type=str, help="Search for forms using vector similarity.")
+    parser.add_argument("--topic", type=str, help="Search forms by specific topic.")
+    parser.add_argument("--topics", action="store_true", help="List all available topics.")
+    parser.add_argument("--stats", action="store_true", help="Show database statistics.")
+    parser.add_argument("--limit", type=int, default=5, help="Number of results to return (default: 5).")
+    
+    # Legacy operations (deprecated)
+    parser.add_argument("--crawl", action="store_true", help="[DEPRECATED] Use comprehensive_legal_crawler.py instead.")
+    parser.add_argument("--build-index", action="store_true", help="[DEPRECATED] Vector indexing is automatic.")
     
     # MCP options
     parser.add_argument("--mcp-crawl-single", action="store_true", help="Use MCP server to crawl single page.")
@@ -288,14 +551,62 @@ if __name__ == "__main__":
 
     agent = CourtFormsAgent()
     
-    # Local operations
+    # Vector database operations
+    if args.ask:
+        print(f"🤖 Asking: {args.ask}")
+        answer = agent.answer_question(args.ask, top_k=args.limit)
+        print(f"\n📋 Answer:\n{answer}")
+    
+    if args.search:
+        print(f"🔍 Searching for: {args.search}")
+        results = agent.search_vector_database(args.search, limit=args.limit)
+        if results:
+            print(f"\n📋 Found {len(results)} relevant forms:")
+            for i, form in enumerate(results, 1):
+                print(f"\n{i}. {form['form_code']} - {form['title']}")
+                print(f"   Topic: {form['topic']}")
+                print(f"   Similarity: {form['similarity']:.3f}")
+                if form['url']:
+                    print(f"   URL: {form['url']}")
+        else:
+            print("❌ No forms found matching your search.")
+    
+    if args.topic:
+        print(f"🏷️  Searching topic: {args.topic}")
+        results = agent.search_by_topic(args.topic, limit=args.limit)
+        if results:
+            print(f"\n📋 Found {len(results)} forms in topic '{args.topic}':")
+            for i, form in enumerate(results, 1):
+                print(f"\n{i}. {form['form_code']} - {form['title']}")
+                if form['url']:
+                    print(f"   URL: {form['url']}")
+        else:
+            print(f"❌ No forms found for topic '{args.topic}'.")
+    
+    if args.topics:
+        print("🏷️  Available topics:")
+        topics = agent.get_available_topics()
+        if topics:
+            for i, topic in enumerate(topics, 1):
+                print(f"{i:2d}. {topic}")
+        else:
+            print("❌ No topics found in database.")
+    
+    if args.stats:
+        print("📊 Database Statistics:")
+        stats = agent.get_database_stats()
+        if "error" not in stats:
+            print(f"   Total forms: {stats['total_forms']}")
+            print(f"   Total topics: {stats['total_topics']}")
+            print(f"   Database ready: {'✅' if stats['database_ready'] else '❌'}")
+        else:
+            print(f"   ❌ Error: {stats['error']}")
+    
+    # Legacy operations (show deprecation warnings)
     if args.crawl:
         agent.crawl_forms()
     if args.build_index:
         agent.build_index()
-    if args.ask:
-        answer = agent.answer_question(args.ask)
-        print("\nLocal LLM Answer:\n", answer)
     
     # MCP operations
     if args.mcp_crawl_single:

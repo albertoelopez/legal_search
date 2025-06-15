@@ -169,7 +169,8 @@ echo "3. System Status Summary:"
 echo "   • Vector Search: $([ -f "test_vector_search.py" ] && echo "✅ Available" || echo "❌ Missing")"
 echo "   • MCP Server: $([ -f "legal_forms_mcp_server.py" ] && echo "✅ Available" || echo "❌ Missing")"
 echo "   • Frontend: $([ -f "frontend/app.py" ] && echo "✅ Available" || echo "❌ Missing")"
-echo "   • Database: $([ ! -z "$SUPABASE_URL" ] && echo "✅ Configured" || echo "⚠️  Not Configured")"
+echo "   • Environment: $([ -f ".env" ] && echo "✅ Configured" || echo "⚠️  .env file missing")"
+echo "   • Database: $([ ! -z "$SUPABASE_URL" ] && echo "✅ Connected" || echo "⚠️  Not Connected")"
 EOF
 
 # Complete system startup script
@@ -236,9 +237,16 @@ cat > .env.example << 'EOF'
 # Enhanced California Legal Forms Assistant Configuration
 # =====================================================
 
+# LLM API Configuration (Required for AI features)
+LLM_API_URL=https://api.gmi-serving.com/v1/chat/completions
+LLM_API_KEY=your_llm_api_key_here
+
 # Supabase Configuration (Required)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your-service-role-key
+
+# MCP Server Configuration (Optional)
+MCP_BASE_URL=http://localhost:8051
 
 # Vector Search Configuration (Optional - uses defaults)
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
@@ -288,14 +296,15 @@ echo "   • JSON-RPC 2.0 MCP Server"
 echo ""
 echo "📋 Next Steps:"
 echo ""
-echo "1. 🔧 Set up Supabase Database:"
-echo "   • Create account at https://supabase.com"
-echo "   • Create new project"
-echo "   • Get Project URL and Service Role Key"
+echo "1. 🔧 Configure Environment Variables:"
+echo "   • Copy .env.example to .env: cp .env.example .env"
+echo "   • Edit .env with your actual API keys and database credentials"
+echo "   • Required: SUPABASE_URL, SUPABASE_SERVICE_KEY, LLM_API_KEY"
 echo ""
-echo "2. 🌍 Set Environment Variables:"
-echo "   export SUPABASE_URL=\"https://your-project.supabase.co\""
-echo "   export SUPABASE_SERVICE_KEY=\"your-service-key\""
+echo "2. 🗄️ Set up Supabase Database (if not done):"
+echo "   • Create account at https://supabase.com"
+echo "   • Create new project and get URL + Service Role Key"
+echo "   • Add credentials to your .env file"
 echo ""
 echo "3. 🧪 Test the System:"
 echo "   ./test_system.sh"
