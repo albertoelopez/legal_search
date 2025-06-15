@@ -48,10 +48,21 @@ pip install -r requirements.txt
 ### 2. Environment Configuration
 
 ```bash
-# Set environment variables
-export SUPABASE_URL="https://qomnyvidjpoblqbipyjd.supabase.co"
-export SUPABASE_SERVICE_KEY="your-supabase-service-key"
+# Copy environment template and configure
+cp .env.example .env
+
+# Edit .env file with your actual credentials:
+# LLM_API_KEY=your_actual_llm_api_key
+# SUPABASE_URL=https://your-project.supabase.co
+# SUPABASE_SERVICE_KEY=your_actual_supabase_service_key
+# MCP_BASE_URL=http://localhost:8051
 ```
+
+**Required Environment Variables:**
+- `LLM_API_KEY` - Your LLM API key for AI-powered responses
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_KEY` - Your Supabase service role key
+- `MCP_BASE_URL` - MCP server URL (default: http://localhost:8051)
 
 ### 3. Start MCP Server
 
