@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <title>California Legal Forms Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* CSS Custom Properties for Consistent Theming */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #764ba2, #667eea);
+            --card-gradient: linear-gradient(135deg, #f8f9ff, #ffffff);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e0e6ff;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-medium: 0 5px 20px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 10px 30px rgba(0,0,0,0.2);
+            --border-radius-sm: 8px;
+            --border-radius-md: 15px;
+            --border-radius-lg: 20px;
+            --border-radius-xl: 25px;
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            margin: 0; 
+            padding: 1rem;
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Container and Layout */
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            width: 100%;
+        }
+
+        /* Header Styles */
+        .header { 
+            text-align: center; 
+            color: white; 
+            margin-bottom: 2rem; 
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: var(--border-radius-lg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p { 
+            margin: 0.75rem 0 0 0; 
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        /* Search Section */
+        .search-section { 
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg); 
+            padding: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2rem; 
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .search-input { 
+            width: 100%; 
+            padding: 1rem 1.25rem;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            border: 2px solid var(--border-color); 
+            border-radius: var(--border-radius-md);
+            margin-bottom: 1rem; 
+            transition: all var(--transition-medium);
+            background: white;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .search-btn { 
+            background: var(--primary-gradient);
+            color: white; 
+            border: none; 
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius-md);
+            cursor: pointer; 
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            font-weight: 600;
+            transition: all var(--transition-medium);
+            width: 100%;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-btn:hover, .search-btn:focus { 
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            outline: none;
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Quick Questions */
+        .quick-questions { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .quick-question { 
+            background: rgba(248, 249, 255, 0.8);
+            border: 2px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            border-radius: var(--border-radius-xl);
+            cursor: pointer; 
+            transition: all var(--transition-medium);
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 3.5rem;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .quick-question:hover, .quick-question:focus { 
+            background: var(--primary-gradient);
+            color: white; 
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+            border-color: transparent;
+        }
+
+        .quick-question:active {
+            transform: translateY(-1px);
+        }
+
+        .quick-question i {
+            font-size: 1.1em;
+        }
+        
+        /* Results and Loading */
+        .results, .loading { 
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2rem; 
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .results {
+            display: none;
+        }
+        
+        .loading { 
+            display: none; 
+            text-align: center; 
+            padding: 3rem 1.5rem;
+        }
+
+        .loading i { 
+            font-size: 3rem; 
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Form Cards */
+        .form-card { 
+            background: var(--card-gradient);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all var(--transition-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform var(--transition-medium);
+        }
+
+        .form-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .form-card:hover { 
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+            border-color: var(--primary-color);
+        }
+        
+        .form-code { 
+            background: var(--primary-gradient);
+            color: white; 
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-lg);
+            font-weight: 700;
+            display: inline-block; 
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-title { 
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .form-topic { 
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-similarity { 
+            position: absolute; 
+            top: 1rem;
+            right: 1rem;
+            background: var(--success-color);
+            color: white; 
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-md);
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .form-url { 
+            margin-top: 1rem;
+        }
+
+        .form-url a { 
+            color: var(--primary-color);
+            text-decoration: none; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .form-url a:hover { 
+            text-decoration: underline;
+            color: var(--secondary-color);
+        }
+        
+        /* Tab System */
+        .tab-buttons { 
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn { 
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--primary-color);
+            background: white; 
+            color: var(--primary-color);
+            border-radius: var(--border-radius-xl);
+            cursor: pointer; 
+            transition: all var(--transition-medium);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            flex: 1;
+            justify-content: center;
+            min-width: 150px;
+        }
+
+        .tab-btn.active { 
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .guidance-section, .search-section-results { 
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .guidance-section.active, .search-section-results.active { 
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Bar */
+        .stats-bar { 
+            background: rgba(248, 249, 255, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 1.5rem;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-bar strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        /* Admin Section */
+        .admin-section { 
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            padding: clamp(1.5rem, 4vw, 2rem);
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .admin-section h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: clamp(1.3rem, 3vw, 1.5rem);
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .admin-btn { 
+            background: var(--secondary-gradient);
+            color: white; 
+            border: none; 
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-md);
+            cursor: pointer; 
+            transition: all var(--transition-medium);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-family: inherit;
+            font-size: 1rem;
+            min-height: 3rem;
+        }
+
+        .admin-btn:hover, .admin-btn:focus { 
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            outline: none;
+        }
+
+        .admin-btn:active {
+            transform: translateY(0);
+        }
+
+        #statusMessage {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            display: none;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+
+        /* Content Sections */
+        .guidance-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: clamp(1.3rem, 3vw, 1.5rem);
+        }
+
+        .guidance-section h3 {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: clamp(1.1rem, 2.5vw, 1.2rem);
+        }
+
+        .guidance-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .guidance-section ol, .guidance-section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .guidance-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design - Mobile First */
+        
+        /* Small devices (phones, 576px and down) */
+        @media (max-width: 575.98px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .header {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .search-section, .results, .loading, .admin-section {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .quick-questions {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .quick-question {
+                padding: 0.75rem 1rem;
+                min-height: 3rem;
+                font-size: 0.9rem;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                min-width: auto;
+                padding: 0.75rem 1rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .form-card {
+                padding: 1rem;
+                margin: 0.75rem 0;
+            }
+
+            .form-similarity {
+                position: static;
+                display: inline-block;
+                margin-bottom: 0.5rem;
+            }
+
+            .admin-controls {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .admin-btn {
+                padding: 0.875rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Medium devices (tablets, 768px and up) */
+        @media (min-width: 576px) and (max-width: 991.98px) {
+            .quick-questions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tab-buttons {
+                justify-content: center;
+            }
+
+            .admin-controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Large devices (desktops, 992px and up) */
+        @media (min-width: 992px) {
+            .search-btn {
+                width: auto;
+                display: inline-block;
+            }
+
+            .quick-questions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .admin-controls {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Extra large devices (large desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .container {
+                padding: 0 2rem;
+            }
+
+            .quick-questions {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .header, .search-section, .results, .loading, .admin-section {
+                border: 0.5px solid rgba(255,255,255,0.3);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #e0e0e0;
+                --text-secondary: #b0b0b0;
+                --border-color: #404040;
+            }
+
+            .search-section, .results, .loading, .admin-section {
+                background: rgba(30,30,30,0.95);
+                color: var(--text-primary);
+            }
+
+            .search-input {
+                background: #2a2a2a;
+                color: var(--text-primary);
+                border-color: var(--border-color);
+            }
+
+            .form-card {
+                background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+                border-color: var(--border-color);
+            }
+
+            .stats-bar {
+                background: rgba(40,40,40,0.8);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .header, .search-section, .admin-section {
+                background: white;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+
+            .search-btn, .admin-btn, .quick-question {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-balance-scale" aria-hidden="true"></i> California Legal Forms Assistant</h1>
+            <p>Get expert guidance on California court forms and legal procedures</p>
+        </div>
+        
+        <div class="search-section">
+            <input type="text" id="searchInput" class="search-input" placeholder="Ask me anything about California legal forms..." aria-label="Search legal forms">
+            <button id="searchBtn" class="search-btn" aria-label="Search forms">
+                <i class="fas fa-search" aria-hidden="true"></i> Search
+            </button>
+            
+            <div class="quick-questions" role="group" aria-label="Quick question buttons">
+                <button class="quick-question" data-question="How do I file for divorce in California?" aria-label="Get divorce process information">
+                    <i class="fas fa-heart-broken" aria-hidden="true"></i> Divorce Process
+                </button>
+                <button class="quick-question" data-question="What forms do I need for child custody?" aria-label="Get child custody form information">
+                    <i class="fas fa-child" aria-hidden="true"></i> Child Custody
+                </button>
+                <button class="quick-question" data-question="How do I modify child support?" aria-label="Get child support modification information">
+                    <i class="fas fa-dollar-sign" aria-hidden="true"></i> Child Support
+                </button>
+                <button class="quick-question" data-question="What forms are needed for adoption?" aria-label="Get adoption form information">
+                    <i class="fas fa-home" aria-hidden="true"></i> Adoption
+                </button>
+                <button class="quick-question" data-question="FL-180" aria-label="Find FL-180 form">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i> FL-180 Form
+                </button>
+                <button class="quick-question" data-question="DV-100" aria-label="Find DV-100 form">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i> DV-100 Form
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading" role="status" aria-live="polite">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <p>Searching legal database...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="tab-buttons" role="tablist">
+                <button class="tab-btn active" data-tab="guidance" role="tab" aria-selected="true" aria-controls="guidanceSection">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i> Legal Guidance
+                </button>
+                <button class="tab-btn" data-tab="search" role="tab" aria-selected="false" aria-controls="searchSection">
+                    <i class="fas fa-search" aria-hidden="true"></i> Form Search Results
+                </button>
+            </div>
+            
+            <div class="guidance-section active" id="guidanceSection" role="tabpanel" aria-labelledby="guidance-tab">
+                <h2 id="resultTitle">Legal Guidance</h2>
+                <div id="guidanceDescription"></div>
+                <div id="formsContainer"></div>
+                <div id="stepsContainer"></div>
+                <div id="requirementsContainer"></div>
+                <div id="linksContainer"></div>
+            </div>
+            
+            <div class="search-section-results" id="searchSection" role="tabpanel" aria-labelledby="search-tab">
+                <div class="stats-bar" id="searchStats" style="display: none;">
+                    <div>
+                        <strong id="searchQuery"></strong>
+                    </div>
+                    <div>
+                        <span id="searchCount">0</span> forms found
+                    </div>
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <h2><i class="fas fa-cogs" aria-hidden="true"></i> System Administration</h2>
+            <div class="admin-controls">
+                <button class="admin-btn" id="crawlBtn" aria-label="Start crawling forms">
+                    <i class="fas fa-spider" aria-hidden="true"></i> Crawl Forms
+                </button>
+                <button class="admin-btn" id="smartCrawlBtn" aria-label="Start smart crawling">
+                    <i class="fas fa-brain" aria-hidden="true"></i> Smart Crawl
+                </button>
+                <button class="admin-btn" id="sourcesBtn" aria-label="Check available sources">
+                    <i class="fas fa-database" aria-hidden="true"></i> Check Sources
+                </button>
+            </div>
+            <div id="statusMessage" role="alert" aria-live="polite"></div>
+        </div>
+    </div>
+    
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const searchBtn = document.getElementById("searchBtn");
+        const loading = document.getElementById("loading");
+        const results = document.getElementById("results");
+        const quickQuestions = document.querySelectorAll(".quick-question");
+        const statusMessage = document.getElementById("statusMessage");
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        
+        let currentSearchResults = null;
+        
+        // Tab switching with accessibility
+        tabButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const tab = btn.getAttribute("data-tab");
+                
+                // Update active tab button
+                tabButtons.forEach(b => {
+                    b.classList.remove("active");
+                    b.setAttribute("aria-selected", "false");
+                });
+                btn.classList.add("active");
+                btn.setAttribute("aria-selected", "true");
+                
+                // Show/hide sections
+                document.getElementById("guidanceSection").classList.toggle("active", tab === "guidance");
+                document.getElementById("searchSection").classList.toggle("active", tab === "search");
+            });
+
+            // Keyboard navigation for tabs
+            btn.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    btn.click();
+                }
+            });
+        });
+        
+        async function performSearch(question) {
+            if (!question.trim()) return;
+            
+            loading.style.display = "block";
+            results.style.display = "none";
+            
+            // Announce to screen readers
+            loading.setAttribute("aria-label", `Searching for: ${question}`);
+            
+            try {
+                // Perform both guidance and search requests
+                const [guidanceResponse, searchResponse] = await Promise.all([
+                    fetch("/api/ask", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ question: question })
+                    }),
+                    fetch("/api/search", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: question })
+                    })
+                ]);
+                
+                const guidanceData = await guidanceResponse.json();
+                const searchData = await searchResponse.json();
+                
+                if (guidanceData.error) throw new Error(guidanceData.error);
+                if (searchData.error) throw new Error(searchData.error);
+                
+                displayResults(guidanceData, searchData);
+                
+            } catch (error) {
+                console.error("Error:", error);
+                showStatus("Error: " + error.message, "error");
+            } finally {
+                loading.style.display = "none";
+            }
+        }
+        
+        function displayResults(guidanceData, searchData) {
+            const guidance = guidanceData.guidance;
+            currentSearchResults = searchData;
+            
+            // Display guidance
+            document.getElementById("resultTitle").textContent = "Guidance for: \"" + guidanceData.question + "\"";
+            document.getElementById("guidanceDescription").innerHTML = "<p>" + guidance.description + "</p>";
+            
+            // Display forms from guidance
+            const formsContainer = document.getElementById("formsContainer");
+            if (guidance.forms && guidance.forms.length > 0) {
+                formsContainer.innerHTML = "<h3><i class='fas fa-file-alt' aria-hidden='true'></i> Required Forms:</h3>" +
+                    guidance.forms.map(form => 
+                        "<div class=\"form-card\">" +
+                            "<div class=\"form-code\">" + form.code + "</div>" +
+                            "<div class=\"form-title\">" + form.name + "</div>" +
+                            "<div>" + form.purpose + "</div>" +
+                        "</div>"
+                    ).join("");
+            } else {
+                formsContainer.innerHTML = "";
+            }
+            
+            // Display steps
+            const stepsContainer = document.getElementById("stepsContainer");
+            if (guidance.steps && guidance.steps.length > 0) {
+                stepsContainer.innerHTML = "<h3><i class='fas fa-list-ol' aria-hidden='true'></i> Steps to Follow:</h3><ol>" +
+                    guidance.steps.map(step => "<li>" + step + "</li>").join("") + "</ol>";
+            } else {
+                stepsContainer.innerHTML = "";
+            }
+            
+            // Display requirements
+            const requirementsContainer = document.getElementById("requirementsContainer");
+            if (guidance.requirements && guidance.requirements.length > 0) {
+                requirementsContainer.innerHTML = "<h3><i class='fas fa-check-circle' aria-hidden='true'></i> Requirements:</h3><ul>" +
+                    guidance.requirements.map(req => "<li>" + req + "</li>").join("") + "</ul>";
+            } else {
+                requirementsContainer.innerHTML = "";
+            }
+            
+            // Display links
+            const linksContainer = document.getElementById("linksContainer");
+            if (guidance.links && guidance.links.length > 0) {
+                linksContainer.innerHTML = "<h3><i class='fas fa-external-link-alt' aria-hidden='true'></i> Helpful Resources:</h3>" +
+                    guidance.links.map(link => 
+                        "<p><a href=\"" + link.url + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + link.text + "</a></p>"
+                    ).join("");
+            } else {
+                linksContainer.innerHTML = "";
+            }
+            
+            // Display search results
+            displaySearchResults(searchData);
+            
+            results.style.display = "block";
+            
+            // Announce results to screen readers
+            setTimeout(() => {
+                results.setAttribute("aria-label", `Search results loaded for: ${guidanceData.question}`);
+            }, 100);
+        }
+        
+        function displaySearchResults(searchData) {
+            const searchResults = document.getElementById("searchResults");
+            const searchStats = document.getElementById("searchStats");
+            const searchQuery = document.getElementById("searchQuery");
+            const searchCount = document.getElementById("searchCount");
+            
+            if (searchData.forms && searchData.forms.length > 0) {
+                searchQuery.textContent = `"${searchData.query}"`;
+                searchCount.textContent = searchData.total_found;
+                searchStats.style.display = "flex";
+                
+                searchResults.innerHTML = searchData.forms.map(form => 
+                    "<div class=\"form-card\">" +
+                        "<div class=\"form-similarity\" aria-label=\"Similarity score\">" + (form.similarity * 100).toFixed(1) + "%</div>" +
+                        "<div class=\"form-code\">" + form.code + "</div>" +
+                        "<div class=\"form-title\">" + form.title + "</div>" +
+                        "<div class=\"form-topic\"><i class='fas fa-tag' aria-hidden='true'></i> " + form.topic + "</div>" +
+                        (form.url ? "<div class=\"form-url\"><a href=\"" + form.url + "\" target=\"_blank\" rel=\"noopener noreferrer\"><i class='fas fa-external-link-alt' aria-hidden='true'></i> View Form</a></div>" : "") +
+                    "</div>"
+                ).join("");
+            } else {
+                searchStats.style.display = "none";
+                searchResults.innerHTML = "<p>No forms found for this search query.</p>";
+            }
+        }
+        
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.style.backgroundColor = type === "error" ? "#f8d7da" : "#d4edda";
+            statusMessage.style.color = type === "error" ? "#721c24" : "#155724";
+            statusMessage.style.borderLeftColor = type === "error" ? "#dc3545" : "#28a745";
+            statusMessage.style.display = "block";
+            setTimeout(() => statusMessage.style.display = "none", 5000);
+        }
+        
+        // Event listeners
+        searchBtn.addEventListener("click", () => performSearch(searchInput.value));
+        
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                performSearch(searchInput.value);
+            }
+        });
+        
+        quickQuestions.forEach(question => {
+            question.addEventListener("click", () => {
+                const questionText = question.getAttribute("data-question");
+                searchInput.value = questionText;
+                performSearch(questionText);
+            });
+
+            // Keyboard support for quick questions
+            question.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    question.click();
+                }
+            });
+        });
+        
+        // Admin functions
+        document.getElementById("crawlBtn").addEventListener("click", async () => {
+            try {
+                await fetch("/api/crawl", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: "single" })
+                });
+                showStatus("Crawling started successfully!", "success");
+            } catch (error) {
+                showStatus("Error starting crawl: " + error.message, "error");
+            }
+        });
+        
+        document.getElementById("smartCrawlBtn").addEventListener("click", async () => {
+            try {
+                await fetch("/api/crawl", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: "smart" })
+                });
+                showStatus("Smart crawling started successfully!", "success");
+            } catch (error) {
+                showStatus("Error starting smart crawl: " + error.message, "error");
+            }
+        });
+        
+        document.getElementById("sourcesBtn").addEventListener("click", async () => {
+            try {
+                const response = await fetch("/api/sources");
+                const data = await response.json();
+                showStatus("Sources checked - see console for details", "success");
+                console.log("Available sources:", data);
+            } catch (error) {
+                showStatus("Error checking sources: " + error.message, "error");
+            }
+        });
+
+        // Touch and gesture support
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                // Optional: Add swipe gestures for tab switching
+                // This can be implemented based on user needs
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.value = '';
+                results.style.display = 'none';
+            }
+        });
+
+        // Auto-focus search input on page load (desktop only)
+        if (window.innerWidth > 768) {
+            searchInput.focus();
+        }
+    </script>
+</body>
+</html>

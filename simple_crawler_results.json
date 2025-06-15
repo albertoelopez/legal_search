@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "duration": 58.45760536193848,
+  "stats": {
+    "topics_processed": 26,
+    "forms_found": 718,
+    "documents_stored": 718,
+    "errors": []
+  }
+}

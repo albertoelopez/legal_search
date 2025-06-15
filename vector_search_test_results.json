@@ -1,0 +1,102 @@
+{
+  "test_time": 1.0161519050598145,
+  "test_results": [
+    {
+      "query": "divorce papers",
+      "success": true,
+      "similarity": 0.518882155418396,
+      "topic": "divorce",
+      "form_code": "FL-150",
+      "search_time": 0.049266815185546875
+    },
+    {
+      "query": "child custody forms",
+      "success": true,
+      "similarity": 0.598886931008881,
+      "topic": "child custody and visitation",
+      "form_code": "FL-341",
+      "search_time": 0.05170869827270508
+    },
+    {
+      "query": "adoption documents",
+      "success": true,
+      "similarity": 0.456922113895416,
+      "topic": "adoption",
+      "form_code": "ICWA-030",
+      "search_time": 0.04384946823120117
+    },
+    {
+      "query": "eviction notice",
+      "success": true,
+      "similarity": 0.43555628869273,
+      "topic": "elder abuse",
+      "form_code": "EA-610",
+      "search_time": 0.04346585273742676
+    },
+    {
+      "query": "domestic violence restraining order",
+      "success": true,
+      "similarity": 0.338575790482038,
+      "topic": "divorce",
+      "form_code": "FL-830",
+      "search_time": 0.0439753532409668
+    },
+    {
+      "query": "FL-180",
+      "success": true,
+      "similarity": 0.41765753679447,
+      "topic": "divorce",
+      "form_code": "FL-165",
+      "search_time": 0.04747509956359863
+    },
+    {
+      "query": "DV-100",
+      "success": true,
+      "similarity": 0.445058286190036,
+      "topic": "domestic violence",
+      "form_code": "DV-830",
+      "search_time": 0.04718732833862305
+    },
+    {
+      "query": "how to change my name legally",
+      "success": true,
+      "similarity": 0.412831986715317,
+      "topic": "name change",
+      "form_code": "NC-312",
+      "search_time": 0.049146175384521484
+    },
+    {
+      "query": "small claims court filing",
+      "success": true,
+      "similarity": 0.711949800020485,
+      "topic": "small claims",
+      "form_code": "SC-120",
+      "search_time": 0.05243539810180664
+    },
+    {
+      "query": "probate estate administration",
+      "success": true,
+      "similarity": 0.649625083826478,
+      "topic": "probate",
+      "form_code": "DE-121",
+      "search_time": 0.05131816864013672
+    },
+    {
+      "query": "traffic ticket appeal",
+      "success": true,
+      "similarity": 0.433384861551814,
+      "topic": "traffic",
+      "form_code": "CR-141",
+      "search_time": 0.04616117477416992
+    },
+    {
+      "query": "fee waiver application",
+      "success": true,
+      "similarity": 0.677244622871611,
+      "topic": "fee waivers",
+      "form_code": "FW-011",
+      "search_time": 0.04990506172180176
+    }
+  ],
+  "timestamp": 1749972260.957201
+}

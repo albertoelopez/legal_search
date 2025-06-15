@@ -1,0 +1,20 @@
+{
+  "tables_exist": {
+    "documents": false,
+    "crawled_pages": false,
+    "sources": false
+  },
+  "can_insert": {
+    "documents": false,
+    "crawled_pages": false,
+    "sources": false
+  },
+  "record_counts": {
+    "documents": 0,
+    "crawled_pages": 0,
+    "sources": 0
+  },
+  "recommended_table": null,
+  "storage_ready": false,
+  "sample_storage_success": false
+}
