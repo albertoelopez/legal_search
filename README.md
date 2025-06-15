@@ -9,6 +9,24 @@ This enhanced system consists of three main components:
 2. **MCP Server** - JSON-RPC 2.0 server providing standardized API access to legal forms
 3. **Modern Web Frontend** - Beautiful, responsive interface with glass-morphism design
 
+## 🙏 Acknowledgments
+
+This project builds upon the excellent work from the [MCP Crawl4AI RAG repository](https://github.com/coleam00/mcp-crawl4ai-rag) by [@coleam00](https://github.com/coleam00). The MCP server implementation in this project was inspired by and adapted from their comprehensive Model Context Protocol server template, which provides web crawling and RAG capabilities for AI agents.
+
+**Key components adapted:**
+- **MCP Server Architecture**: JSON-RPC 2.0 implementation patterns
+- **Vector Database Integration**: Supabase with pgvector setup
+- **RAG Implementation**: Semantic search and retrieval strategies
+- **Environment Configuration**: Secure API key management patterns
+
+We've customized and extended their foundation to create a specialized legal forms assistant with:
+- California-specific legal form database (718 forms across 26 topics)
+- Enhanced web interface with glass-morphism design
+- Specialized legal guidance system
+- Clickable form links and accessibility features
+
+Special thanks to Cole Medin for creating such a robust and well-documented MCP server template that made this legal forms assistant possible!
+
 ## ✨ Key Features
 
 ### 📊 Comprehensive Legal Database

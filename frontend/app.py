@@ -122,10 +122,10 @@ class LegalAgentAPI:
             guidance.update({
                 "description": "For divorce proceedings in California, you typically need several forms and must meet specific requirements.",
                 "forms": [
-                    {"code": "FL-100", "name": "Petition for Dissolution", "purpose": "Initial filing to start divorce process"},
-                    {"code": "FL-110", "name": "Summons", "purpose": "Legal notice to spouse"},
-                    {"code": "FL-140/FL-142", "name": "Declaration of Disclosure", "purpose": "Financial information disclosure"},
-                    {"code": "FL-180", "name": "Settlement Agreement", "purpose": "If divorce is uncontested"}
+                    {"code": "FL-100", "name": "Petition for Dissolution", "purpose": "Initial filing to start divorce process", "url": "https://selfhelp.courts.ca.gov/find-forms?query=divorce#FL-100"},
+                    {"code": "FL-110", "name": "Summons", "purpose": "Legal notice to spouse", "url": "https://selfhelp.courts.ca.gov/find-forms?query=divorce#FL-110"},
+                    {"code": "FL-140", "name": "Declaration of Disclosure", "purpose": "Financial information disclosure", "url": "https://selfhelp.courts.ca.gov/find-forms?query=divorce#FL-140"},
+                    {"code": "FL-180", "name": "Settlement Agreement", "purpose": "If divorce is uncontested", "url": "https://selfhelp.courts.ca.gov/find-forms?query=divorce#FL-180"}
                 ],
                 "requirements": [
                     "6 months residency in California",
@@ -149,10 +149,10 @@ class LegalAgentAPI:
             guidance.update({
                 "description": "Adoption in California involves legal procedures to establish a parent-child relationship. Different types of adoption have different requirements and forms.",
                 "forms": [
-                    {"code": "ADOPT-200", "name": "Petition for Adoption", "purpose": "Initial petition to request adoption"},
-                    {"code": "ADOPT-210", "name": "Contact After Adoption Agreement", "purpose": "Agreement for ongoing contact after adoption"},
-                    {"code": "ADOPT-215", "name": "Adoption Request", "purpose": "Request for adoption order"},
-                    {"code": "ADOPT-220", "name": "Adoption Order", "purpose": "Court order finalizing adoption"}
+                    {"code": "ADOPT-200", "name": "Petition for Adoption", "purpose": "Initial petition to request adoption", "url": "https://selfhelp.courts.ca.gov/find-forms?query=adoption#ADOPT-200"},
+                    {"code": "ADOPT-210", "name": "Contact After Adoption Agreement", "purpose": "Agreement for ongoing contact after adoption", "url": "https://selfhelp.courts.ca.gov/find-forms?query=adoption#ADOPT-210"},
+                    {"code": "ADOPT-215", "name": "Adoption Request", "purpose": "Request for adoption order", "url": "https://selfhelp.courts.ca.gov/find-forms?query=adoption#ADOPT-215"},
+                    {"code": "ADOPT-220", "name": "Adoption Order", "purpose": "Court order finalizing adoption", "url": "https://selfhelp.courts.ca.gov/find-forms?query=adoption#ADOPT-220"}
                 ],
                 "requirements": [
                     "Home study and background check",
@@ -181,9 +181,9 @@ class LegalAgentAPI:
             guidance.update({
                 "description": "Child custody matters in California prioritize the child's best interests above all else.",
                 "forms": [
-                    {"code": "FL-300", "name": "Request for Order", "purpose": "To request custody/visitation orders"},
-                    {"code": "FL-311", "name": "Declaration", "purpose": "Your statement to the court"},
-                    {"code": "FL-341E", "name": "Parenting Plan", "purpose": "Detailed custody arrangement"}
+                    {"code": "FL-300", "name": "Request for Order", "purpose": "To request custody/visitation orders", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+custody+and+visitation#FL-300"},
+                    {"code": "FL-311", "name": "Declaration", "purpose": "Your statement to the court", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+custody+and+visitation#FL-311"},
+                    {"code": "FL-341E", "name": "Parenting Plan", "purpose": "Detailed custody arrangement", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+custody+and+visitation#FL-341E"}
                 ],
                 "requirements": [
                     "Child's best interests are paramount",
@@ -208,9 +208,9 @@ class LegalAgentAPI:
             guidance.update({
                 "description": "Child and spousal support in California is calculated based on specific guidelines and factors.",
                 "forms": [
-                    {"code": "FL-150", "name": "Income and Expense Declaration", "purpose": "Financial information for support calculation"},
-                    {"code": "FL-300", "name": "Request for Order", "purpose": "To request support orders"},
-                    {"code": "FL-191", "name": "Child Support Case Registry Form", "purpose": "Register case for support enforcement"}
+                    {"code": "FL-150", "name": "Income and Expense Declaration", "purpose": "Financial information for support calculation", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+support#FL-150"},
+                    {"code": "FL-300", "name": "Request for Order", "purpose": "To request support orders", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+support#FL-300"},
+                    {"code": "FL-191", "name": "Child Support Case Registry Form", "purpose": "Register case for support enforcement", "url": "https://selfhelp.courts.ca.gov/find-forms?query=child+support#FL-191"}
                 ],
                 "requirements": [
                     "Both parents' income information",
@@ -235,11 +235,11 @@ class LegalAgentAPI:
             guidance.update({
                 "description": "Restraining orders (also called protective orders) are court orders that help protect you from harassment, abuse, stalking, or threats.",
                 "forms": [
-                    {"code": "DV-100", "name": "Request for Domestic Violence Restraining Order", "purpose": "Initial petition for domestic violence protection"},
-                    {"code": "DV-110", "name": "Temporary Restraining Order", "purpose": "Immediate temporary protection"},
-                    {"code": "DV-120", "name": "Response to Request for Domestic Violence Restraining Order", "purpose": "Respondent's response to the request"},
-                    {"code": "CH-100", "name": "Request for Civil Harassment Restraining Order", "purpose": "Protection from non-domestic harassment"},
-                    {"code": "SV-100", "name": "Request for Sexual Violence Restraining Order", "purpose": "Protection from sexual violence"}
+                    {"code": "DV-100", "name": "Request for Domestic Violence Restraining Order", "purpose": "Initial petition for domestic violence protection", "url": "https://selfhelp.courts.ca.gov/find-forms?query=domestic+violence#DV-100"},
+                    {"code": "DV-110", "name": "Temporary Restraining Order", "purpose": "Immediate temporary protection", "url": "https://selfhelp.courts.ca.gov/find-forms?query=domestic+violence#DV-110"},
+                    {"code": "DV-120", "name": "Response to Request for Domestic Violence Restraining Order", "purpose": "Respondent's response to the request", "url": "https://selfhelp.courts.ca.gov/find-forms?query=domestic+violence#DV-120"},
+                    {"code": "CH-100", "name": "Request for Civil Harassment Restraining Order", "purpose": "Protection from non-domestic harassment", "url": "https://selfhelp.courts.ca.gov/find-forms?query=civil+harassment#CH-100"},
+                    {"code": "SV-100", "name": "Request for Sexual Violence Restraining Order", "purpose": "Protection from sexual violence", "url": "https://selfhelp.courts.ca.gov/find-forms?query=domestic+violence#SV-100"}
                 ],
                 "requirements": [
                     "Evidence of harassment, abuse, or threats",
